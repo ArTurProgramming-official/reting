@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>6 Б – безопасный рейтинг</title>
+    <title>6 Б – рейтинг класса</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -27,6 +27,28 @@
         
         .content { padding: 20px; }
         
+        .login-panel {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border: 2px solid #2196f3;
+            border-radius: 15px; padding: 25px; margin: 20px 0; text-align: center;
+        }
+        
+        .login-form {
+            display: flex; flex-direction: column; gap: 15px; max-width: 300px; margin: 0 auto;
+        }
+        
+        .form-group { display: flex; flex-direction: column; gap: 8px; text-align: left; }
+        .form-group label { font-weight: 600; color: #1976d2; }
+        
+        .form-group input {
+            padding: 12px; border: 2px solid #2196f3; border-radius: 8px; font-size: 16px;
+        }
+        
+        .login-btn {
+            padding: 15px; background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+            color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;
+            margin-top: 10px;
+        }
+        
         .connection-status {
             display: flex; align-items: center; justify-content: center; gap: 12px; padding: 15px;
             background: #f8f9fa; border-radius: 10px; margin: 15px 0; font-weight: 500;
@@ -44,11 +66,16 @@
         
         .user-card {
             background: white; border-radius: 15px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: all 0.3s ease; border: 2px solid transparent;
+            transition: all 0.3s ease; border: 2px solid transparent; position: relative;
         }
         
         .user-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
         .user-card.creator { background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); border-color: #ff9800; }
+        
+        .vote-count {
+            position: absolute; top: 10px; right: 10px; background: #ff9800; color: white;
+            padding: 5px 10px; border-radius: 15px; font-size: 12px; font-weight: bold;
+        }
         
         .card-top { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
         
@@ -82,6 +109,7 @@
         }
         
         .vote-btn:hover { transform: translateY(-2px); }
+        .vote-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .like-btn { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
         .dislike-btn { background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%); }
         
@@ -100,10 +128,16 @@
         .panel-btn:hover { transform: translateY(-2px); }
         .admin-mode-btn { background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; }
         .admin-mode-btn.active { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
+        .reset-btn { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; }
         
         .status-bar {
             text-align: center; padding: 15px; color: #6c757d; font-size: 14px;
             background: #f8f9fa; border-radius: 10px; margin-top: 20px;
+        }
+        
+        .user-info {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            background: #e8f5e8; padding: 10px; border-radius: 8px; margin: 10px 0;
         }
         
         .loading { text-align: center; padding: 40px; color: #6c757d; }
@@ -114,13 +148,13 @@
         }
         
         .error-panel {
-            background: #f8d7da; border: 2px solid #f5c6cb; border-radius: 15px; padding: 20px;
-            margin: 20px 0; text-align: center; color: #721c24;
+            background: #fff3cd; border: 2px solid #ffeaa7; border-radius: 15px; padding: 20px;
+            margin: 20px 0; text-align: center; color: #856404;
         }
         
         .retry-btn {
-            padding: 10px 20px; background: #dc3545; color: white; border: none;
-            border-radius: 8px; cursor: pointer; margin-top: 10px;
+            padding: 12px 24px; background: #ff9800; color: white; border: none;
+            border-radius: 8px; cursor: pointer; margin-top: 15px; font-weight: 600;
         }
         
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -142,35 +176,55 @@
         </div>
         
         <div class="content">
-            <div class="connection-status" id="connectionStatus">
+            <div class="login-panel" id="loginPanel">
+                <h3><i class="fas fa-lock"></i> Вход в систему</h3>
+                <div class="login-form">
+                    <div class="form-group">
+                        <label for="passwordInput">Пароль ученика:</label>
+                        <input type="password" id="passwordInput" placeholder="Введите ваш пароль">
+                    </div>
+                    <button class="login-btn" id="loginBtn">
+                        <i class="fas fa-sign-in-alt"></i> Войти
+                    </button>
+                </div>
+            </div>
+            
+            <div class="connection-status" id="connectionStatus" style="display: none;">
                 <span class="status-dot status-connecting" id="statusDot"></span>
                 <span id="statusText">Подключение к Firebase...</span>
+            </div>
+            
+            <div class="user-info" id="userInfo" style="display: none;">
+                <i class="fas fa-user"></i>
+                <span id="currentUserName">Пользователь</span>
+                <span class="badge badge-premium" id="premiumBadge" style="display: none;">Премиум (3 голоса)</span>
+                <span class="badge" id="votesInfo">Голосов: 0/1</span>
             </div>
             
             <div class="users-container" id="usersContainer">
                 <div class="loading">
                     <div class="loading-spinner"></div>
-                    <p>Загрузка данных...</p>
+                    <p>Ожидание входа...</p>
                 </div>
             </div>
             
-            <div class="control-panel">
+            <div class="control-panel" id="controlPanel" style="display: none;">
                 <button class="panel-btn admin-mode-btn" id="adminModeBtn">
                     <i class="fas fa-user-shield"></i> Режим админа
                 </button>
-                <button class="panel-btn" id="resetBtn" style="background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%); color: white;">
-                    <i class="fas fa-sync"></i> Обновить данные
+                <button class="panel-btn reset-btn" id="resetBtn">
+                    <i class="fas fa-trash"></i> Сбросить данные
                 </button>
             </div>
             
             <div class="status-bar" id="statusBar">
-                <i class="fas fa-shield-alt"></i> ClassRate System v2.0
+                <i class="fas fa-fire"></i> ClassRate System | Войдите для голосования
             </div>
         </div>
     </div>
 
     <script>
-        // Конфигурация Firebase (уже встроена в код)
+        // Конфигурация Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBnLi6h2ZbHhNUL3ArToBgPC-drwr2OF1E",
             authDomain: "classrate-6b-2025.firebaseapp.com",
@@ -179,6 +233,38 @@
             messagingSenderId: "445580377051",
             appId: "1:445580377051:web:d19ad47e281874edf5c5fe"
         };
+
+        // Пароли для каждого ученика (буквы + цифры)
+        const studentPasswords = {
+            'ab12': 'Артур (создатель)',
+            'cd34': 'Маша Петрова',
+            'ef56': 'Маша Старцева',
+            'gh78': 'Никифоров Матвей',
+            'ij90': 'Арина Хайдукова',
+            'kl12': 'Городилова Варя',
+            'mn34': 'Артем Мерзляков',
+            'op56': 'Вика Батуева',
+            'qr78': 'Саша Скворцов',
+            'st90': 'Кирилл Зяблицев',
+            'uv12': 'Timoti IT specialist',
+            'wx34': 'Ваня',
+            'yz56': 'Юля Ситнюк',
+            'ab78': 'Варя Косякова',
+            'cd90': 'Рома отличник',
+            'ef12': 'Лиля Харламова',
+            'gh34': 'Юля Бабушкина',
+            'ij56': 'Kristina',
+            'kl78': 'Саша Сычугов',
+            'mn90': 'Egor',
+            'op12': 'Никита Курзов',
+            'qr34': 'Варя Акулова',
+            'st56': 'Диляра',
+            'uv78': 'Соня Саблина',
+            'wx90': 'Софа Шляпникова'
+        };
+
+        // Премиум пользователи (могут голосовать 3 раза)
+        const premiumUsers = ['ab12', 'cd34', 'ef56', 'gh78', 'ij90']; // Первые 5 учеников
 
         // Начальные данные учащихся
         const initialUsersData = [
@@ -211,7 +297,8 @@
 
         let usersData = [];
         let db = null;
-        let unsubscribe = null;
+        let currentUser = null;
+        let userVotes = {};
 
         // Инициализация Firebase
         function initializeFirebase() {
@@ -219,65 +306,87 @@
             const statusText = document.getElementById('statusText');
             
             try {
-                // Инициализируем Firebase
                 if (firebase.apps.length === 0) {
                     firebase.initializeApp(firebaseConfig);
                 }
                 
                 db = firebase.firestore();
-                
-                // Проверяем подключение
-                db.collection('test').doc('connection').get()
-                    .then(() => {
-                        statusDot.className = 'status-dot status-connected';
-                        statusText.textContent = 'Подключено к Firebase';
-                        loadData();
-                    })
-                    .catch(error => {
-                        statusDot.className = 'status-dot status-disconnected';
-                        statusText.textContent = 'Ошибка подключения';
-                        showError('Ошибка подключения к Firebase. Проверьте правила безопасности.');
-                    });
+                statusDot.className = 'status-dot status-connected';
+                statusText.textContent = 'Подключено к Firebase';
                 
             } catch (error) {
                 statusDot.className = 'status-dot status-disconnected';
-                statusText.textContent = 'Ошибка инициализации';
-                showError('Ошибка инициализации Firebase: ' + error.message);
+                statusText.textContent = 'Ошибка подключения';
             }
         }
 
-        function showError(message) {
-            const usersContainer = document.getElementById('usersContainer');
-            usersContainer.innerHTML = `
-                <div class="error-panel">
-                    <h3><i class="fas fa-exclamation-triangle"></i> Ошибка</h3>
-                    <p>${message}</p>
-                    <p>Проверьте правила безопасности Firestore:</p>
-                    <pre style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0; font-size: 12px;">
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    allow read: if true;
-    allow write: if 
-      request.headers.origin.matches('https://[a-zA-Z0-9-]+\\.github\\.io') ||
-      request.headers.origin.matches('http://localhost(:[0-9]+)?');
-  }
-}</pre>
-                    <button class="retry-btn" onclick="initializeFirebase()">
-                        <i class="fas fa-redo"></i> Попробовать снова
-                    </button>
-                </div>
-            `;
+        // Вход по паролю
+        function login() {
+            const password = document.getElementById('passwordInput').value.trim();
+            
+            if (!password) {
+                alert('Введите пароль');
+                return;
+            }
+            
+            if (studentPasswords[password]) {
+                currentUser = {
+                    password: password,
+                    name: studentPasswords[password],
+                    isPremium: premiumUsers.includes(password),
+                    maxVotes: premiumUsers.includes(password) ? 3 : 1
+                };
+                
+                // Загружаем историю голосов пользователя
+                loadUserVotes();
+                showAppInterface();
+                
+            } else {
+                alert('Неверный пароль!');
+            }
+        }
+
+        function showAppInterface() {
+            document.getElementById('loginPanel').style.display = 'none';
+            document.getElementById('connectionStatus').style.display = 'flex';
+            document.getElementById('userInfo').style.display = 'flex';
+            document.getElementById('controlPanel').style.display = 'grid';
+            
+            document.getElementById('currentUserName').textContent = currentUser.name;
+            document.getElementById('votesInfo').textContent = `Голосов: ${getUsedVotes()}/${currentUser.maxVotes}`;
+            
+            if (currentUser.isPremium) {
+                document.getElementById('premiumBadge').style.display = 'inline-block';
+            }
+            
+            loadData();
+        }
+
+        function loadUserVotes() {
+            const savedVotes = localStorage.getItem(`votes_${currentUser.password}`);
+            userVotes = savedVotes ? JSON.parse(savedVotes) : {};
+        }
+
+        function saveUserVotes() {
+            localStorage.setItem(`votes_${currentUser.password}`, JSON.stringify(userVotes));
+        }
+
+        function getUsedVotes() {
+            return Object.values(userVotes).reduce((sum, votes) => sum + votes, 0);
+        }
+
+        function canVote(userId) {
+            const votesForUser = userVotes[userId] || 0;
+            const totalVotes = getUsedVotes();
+            return votesForUser < 1 && totalVotes < currentUser.maxVotes;
         }
 
         // Загрузка данных из Firebase
         function loadData() {
             if (!db) return;
 
-            if (unsubscribe) unsubscribe();
-
-            unsubscribe = db.collection('users').orderBy('rating', 'desc')
-                .onSnapshot((snapshot) => {
+            db.collection('users').orderBy('rating', 'desc').get()
+                .then((snapshot) => {
                     usersData = [];
                     snapshot.forEach((doc) => {
                         usersData.push({ id: doc.id, ...doc.data() });
@@ -288,9 +397,9 @@ service cloud.firestore {
                     } else {
                         updateDisplay();
                     }
-                }, (error) => {
-                    console.error('Ошибка Firestore:', error);
-                    showError('Ошибка загрузки данных: ' + error.message);
+                })
+                .catch((error) => {
+                    console.error('Ошибка загрузки данных:', error);
                 });
         }
 
@@ -304,14 +413,19 @@ service cloud.firestore {
                 });
                 
                 await batch.commit();
+                loadData();
             } catch (error) {
                 console.error('Ошибка создания данных:', error);
-                showError('Ошибка создания начальных данных');
             }
         }
 
         async function castVote(userId, voteValue) {
-            if (!db) return;
+            if (!db || !currentUser) return;
+            
+            if (!canVote(userId)) {
+                alert('Вы уже проголосовали за этого ученика или исчерпали лимит голосов!');
+                return;
+            }
 
             try {
                 const userRef = db.collection('users').doc(userId);
@@ -334,9 +448,46 @@ service cloud.firestore {
                 
                 await userRef.update(updates);
                 
+                // Сохраняем голос пользователя
+                userVotes[userId] = (userVotes[userId] || 0) + 1;
+                saveUserVotes();
+                
+                loadData();
+                
             } catch (error) {
                 console.error('Ошибка голосования:', error);
-                alert('Ошибка голосования! Проверьте подключение.');
+            }
+        }
+
+        async function resetAllData() {
+            if (!confirm('ВЫ УВЕРЕНЫ? Это удалит ВСЕ данные и сбросит все голосования!')) {
+                return;
+            }
+
+            try {
+                const batch = db.batch();
+                
+                // Сбрасываем всех пользователей
+                initialUsersData.forEach((user) => {
+                    const userRef = db.collection('users').doc(user.id);
+                    batch.set(userRef, user);
+                });
+                
+                await batch.commit();
+                
+                // Очищаем все голосования
+                for (const key in localStorage) {
+                    if (key.startsWith('votes_')) {
+                        localStorage.removeItem(key);
+                    }
+                }
+                
+                userVotes = {};
+                loadData();
+                alert('Все данные сброшены!');
+                
+            } catch (error) {
+                console.error('Ошибка сброса данных:', error);
             }
         }
 
@@ -344,12 +495,19 @@ service cloud.firestore {
             const container = document.getElementById('usersContainer');
             container.innerHTML = '';
             
+            // Обновляем информацию о голосах
+            document.getElementById('votesInfo').textContent = `Голосов: ${getUsedVotes()}/${currentUser.maxVotes}`;
+            
             usersData.forEach((user, index) => {
                 const card = document.createElement('div');
                 card.className = 'user-card';
                 if (user.name === 'Артур (создатель)') card.classList.add('creator');
                 
+                const userVoteCount = userVotes[user.id] || 0;
+                const canUserVote = canVote(user.id);
+                
                 card.innerHTML = `
+                    ${userVoteCount > 0 ? `<div class="vote-count">${userVoteCount}</div>` : ''}
                     <div class="card-top">
                         <div class="place-circle ${index < 3 ? 'top3' : 'other'}">${index + 1}</div>
                         <div class="user-name">${user.name}</div>
@@ -367,10 +525,10 @@ service cloud.firestore {
                         </div>
                     </div>
                     <div class="card-bottom">
-                        <button class="vote-btn like-btn" onclick="castVote('${user.id}', 1)">
+                        <button class="vote-btn like-btn" onclick="castVote('${user.id}', 1)" ${!canUserVote ? 'disabled' : ''}>
                             <i class="fas fa-thumbs-up"></i> Лайк
                         </button>
-                        <button class="vote-btn dislike-btn" onclick="castVote('${user.id}', -1)">
+                        <button class="vote-btn dislike-btn" onclick="castVote('${user.id}', -1)" ${!canUserVote ? 'disabled' : ''}>
                             <i class="fas fa-thumbs-down"></i> Дизлайк
                         </button>
                     </div>
@@ -387,14 +545,16 @@ service cloud.firestore {
         }
 
         function initApp() {
-            // Сразу инициализируем Firebase при загрузке
             initializeFirebase();
             
-            // Настройка обработчиков событий
-            document.getElementById('resetBtn').addEventListener('click', loadData);
+            document.getElementById('loginBtn').addEventListener('click', login);
+            document.getElementById('passwordInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') login();
+            });
+            
+            document.getElementById('resetBtn').addEventListener('click', resetAllData);
         }
 
-        // Запускаем приложение
         window.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
