@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6 Б – рейтинг</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            padding: 0;
+            margin: 0;
+            min-height: 100vh;
+        }
+        
+        .app-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            min-height: 100vh;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Header */
+        .header {
+            background-color: #2e7dba;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        /* Content */
+        .content {
+            padding: 15px;
+        }
+        
+        /* User Cards */
+        .users-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 15px;
+            max-height: 65vh;
+            overflow-y: auto;
+            padding: 5px;
+        }
+        
+        .user-card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .user-card.creator {
+            background-color: #f2fff2;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .user-card.savior {
+            background-color: #f2e6ff;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+        }
+        
+        .user-card.premium {
+            background-color: #e6f0ff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
+        }
+        
+        .card-top {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .place-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .place-circle.creator {
+            background-color: #cc6633;
+        }
+        
+        .place-circle.top3 {
+            background-color: #3388cc;
+        }
+        
+        .place-circle.other {
+            background-color: #999;
+        }
+        
+        .user-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            flex: 1;
+        }
+        
+        .card-middle {
+            display: flex;
+            justify-content: space-around;
+            gap: 15px;
+        }
+        
+        .rating-box, .votes-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+        
+        .label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .rating-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        .rating-value.low {
+            color: #ff4d4d;
+        }
+        
+        .rating-value.medium {
+            color: #ff9933;
+        }
+        
+        .rating-value.high {
+            color: #33cc33;
+        }
+        
+        .votes-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #666;
+        }
+        
+        .card-bottom {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .vote-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .like-btn {
+            background-color: #33cc33;
+        }
+        
+        .like-btn:hover {
+            background-color: #2eb82e;
+        }
+        
+        .dislike-btn {
+            background-color: #ff4d4d;
+        }
+        
+        .dislike-btn:hover {
+            background-color: #e64444;
+        }
+        
+        .admin-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .admin-btn {
+            padding: 8px 12px;
+            background: none;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .savior-btn {
+            color: #9966cc;
+        }
+        
+        .premium-btn {
+            color: #3366cc;
+        }
+        
+        /* Control Panel */
+        .control-panel {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .panel-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .admin-mode-btn {
+            background-color: #2e7dba;
+            color: white;
+        }
+        
+        .admin-mode-btn.active {
+            background-color: #33cc33;
+        }
+        
+        .delete-btn {
+            background-color: white;
+            color: #ff4d4d;
+            border: 1px solid #ff4d4d;
+        }
+        
+        .delete-btn:hover {
+            background-color: #fff0f0;
+        }
+        
+        /* Status Bar */
+        .status-bar {
+            text-align: center;
+            padding: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .modal-text {
+            margin-bottom: 20px;
+            color: #666;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .modal-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .modal-cancel {
+            background-color: #e6e6e6;
+            color: #333;
+        }
+        
+        .modal-confirm {
+            background-color: #ff4d4d;
+            color: white;
+        }
+        
+        /* Badge indicators */
+        .badges {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        
+        .badge {
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            color: white;
+        }
+        
+        .badge-savior {
+            background-color: #9966cc;
+        }
+        
+        .badge-premium {
+            background-color: #3366cc;
+        }
+        
+        .sync-indicator {
+            display: inline-block;
+            margin-left: 10px;
+            font-size: 12px;
+        }
+        
+        .sync-indicator.syncing {
+            color: #2e7dba;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .sync-indicator.success {
+            color: #33cc33;
+        }
+        
+        .sync-indicator.error {
+            color: #ff4d4d;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: #2e7dba;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1>6 Б – рейтинг</h1>
+        </div>
+        
+        <div class="content">
+            <div class="users-container" id="usersContainer">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Загрузка данных...</p>
+                </div>
+            </div>
+            
+            <div class="control-panel">
+                <button class="panel-btn admin-mode-btn" id="adminModeBtn">Режим админа</button>
+                <button class="panel-btn delete-btn" id="deleteAllBtn">Удалить всё</button>
+            </div>
+            
+            <div class="status-bar" id="statusBar">
+                ArTurProgramming V beta
+                <span class="sync-indicator" id="syncIndicator"></span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <div class="modal-title">Удалить ВСЕ данные?</div>
+            <div class="modal-text">Это действие нельзя отменить! Все данные будут удалены и сброшены к начальным значениям.</div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-cancel" id="modalCancel">Отмена</button>
+                <button class="modal-btn modal-confirm" id="modalConfirm">УДАЛИТЬ</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // GitHub API для работы с репозиторием
+        const GITHUB_API = 'https://api.github.com';
+        const REPO_OWNER = 'ArTurProgramming-official';
+        const REPO_NAME = 'reting';
+        const DATA_FILE_PATH = 'data.json';
+        
+        // Токен для доступа к GitHub API (в реальном приложении должен быть защищен)
+        // Для тестирования можно использовать личный токен, но в продакшене это не безопасно
+        const GITHUB_TOKEN = ''; // Оставьте пустым для публичного репозитория
+        
+        // Начальные данные пользователей
+        const initialUsersData = [
+            {id: 1, name: 'Артур (создатель)', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: ['savior', 'premium']},
+            {id: 2, name: 'Маша Петрова', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
+            {id: 3, name: 'Маша Старцева', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
+            {id: 4, name: 'Никифоров Матвей', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
+            {id: 5, name: 'Арина Хайдукова', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
+            {id: 6, name: 'Городилова Варя', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
+            {id: 7, name: 'Артем Мерзляков', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
+            {id: 8, name: 'Вика Батуева', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
+            {id: 9, name: 'Саша Скворцов', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
+            {id: 10, name: 'Кирилл Зяблицев', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
+            {id: 11, name: 'Timoti IT specialist', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
+            {id: 12, name: 'Ваня', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
+            {id: 13, name: 'Юля Ситнюк', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
+            {id: 14, name: 'Варя Косякова', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
+            {id: 15, name: 'Рома отличник', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
+            {id: 16, name: 'Лиля Харламова', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
+            {id: 17, name: 'Юля Бабушкина', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
+            {id: 18, name: 'Kristina', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
+            {id: 19, name: 'Саша Сычугов', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
+            {id: 20, name: 'Egor', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
+            {id: 21, name: 'Никита Курзов', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
+            {id: 22, name: 'Варя Акулова', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
+            {id: 23, name: 'Диляра', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
+            {id: 24, name: 'Соня Саблина', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
+            {id: 25, name: 'Софа Шляпникова', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []}
+        ];
+        
+        let usersData = [];
+        let isAdmin = false;
+        let sha = null; // SHA текущего файла для обновления
+        
+        // Функция для выполнения запросов к GitHub API
+        async function githubApiRequest(url, options = {}) {
+            const headers = {
+                'Accept': 'application/vnd.github.v3+json',
+                ...options.headers
+            };
+            
+            if (GITHUB_TOKEN) {
+                headers['Authorization'] = `token ${GITHUB_TOKEN}`;
+            }
+            
+            const response = await fetch(url, {
+                ...options,
+                headers
+            });
+            
+            if (!response.ok) {
+                throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+            }
+            
+            return response.json();
+        }
+        
+        // Получить содержимое файла из репозитория
+        async function getFileContent() {
+            try {
+                const url = `${GITHUB_API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_FILE_PATH}`;
+                const content = await githubApiRequest(url);
+                
+                // Декодируем содержимое из base64
+                const decodedContent = atob(content.content);
+                sha = content.sha; // Сохраняем SHA для будущих обновлений
+                
+                return JSON.parse(decodedContent);
+            } catch (error) {
+                console.error('Error getting file content:', error);
+                throw error;
+            }
+        }
+        
+        // Обновить содержимое файла в репозитории
+        async function updateFileContent(data) {
+            try {
+                const url = `${GITHUB_API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_FILE_PATH}`;
+                
+                // Кодируем содержимое в base64
+                const content = btoa(JSON.stringify(data, null, 2));
+                
+                const body = {
+                    message: 'Update rating data',
+                    content: content,
+                    sha: sha // Указываем SHA текущего файла для обновления
+                };
+                
+                const result = await githubApiRequest(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+                
+                // Сохраняем новый SHA
+                sha = result.content.sha;
+                return true;
+            } catch (error) {
+                console.error('Error updating file content:', error);
+                throw error;
+            }
+        }
+        
+        // Создать начальный файл, если он не существует
+        async function createInitialFile() {
+            try {
+                const url = `${GITHUB_API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_FILE_PATH}`;
+                
+                const content = btoa(JSON.stringify({ users: initialUsersData }, null, 2));
+                
+                const body = {
+                    message: 'Create initial rating data',
+                    content: content
+                };
+                
+                const result = await githubApiRequest(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+                
+                sha = result.content.sha;
+                return initialUsersData;
+            } catch (error) {
+                console.error('Error creating initial file:', error);
+                throw error;
+            }
+        }
+        
+        // Загрузка данных из GitHub
+        async function loadData() {
+            const syncIndicator = document.getElementById('syncIndicator');
+            syncIndicator.className = 'sync-indicator syncing';
+            syncIndicator.innerHTML = ' <i class="fas fa-sync-alt"></i> Загрузка...';
+            
+            try {
+                const data = await getFileContent();
+                usersData = data.users || [];
+                
+                syncIndicator.className = 'sync-indicator success';
+                syncIndicator.innerHTML = ' <i class="fas fa-check-circle"></i> Данные загружены';
+                
+                setTimeout(() => {
+                    syncIndicator.className = '';
+                    syncIndicator.innerHTML = '';
+                }, 3000);
+                
+                return true;
+            } catch (error) {
+                // Если файл не найден, создаем его с начальными данными
+                if (error.message.includes('404')) {
+                    try {
+                        usersData = await createInitialFile();
+                        
+                        syncIndicator.className = 'sync-indicator success';
+                        syncIndicator.innerHTML = ' <i class="fas fa-plus-circle"></i> Файл создан';
+                        
+                        setTimeout(() => {
+                            syncIndicator.className = '';
+                            syncIndicator.innerHTML = '';
+                        }, 3000);
+                        
+                        return true;
+                    } catch (createError) {
+                        console.error('Error creating initial file:', createError);
+                        syncIndicator.className = 'sync-indicator error';
+                        syncIndicator.innerHTML = ' <i class="fas fa-exclamation-circle"></i> Ошибка создания';
+                        return false;
+                    }
+                } else {
+                    console.error('Error loading data:', error);
+                    syncIndicator.className = 'sync-indicator error';
+                    syncIndicator.innerHTML = ' <i class="fas fa-exclamation-circle"></i> Ошибка загрузки';
+                    return false;
+                }
+            }
+        }
+        
+        // Сохранение данных в GitHub
+        async function saveData() {
+            const syncIndicator = document.getElementById('syncIndicator');
+            syncIndicator.className = 'sync-indicator syncing';
+            syncIndicator.innerHTML = ' <i class="fas fa-sync-alt"></i> Сохранение...';
+            
+            try {
+                await updateFileContent({ users: usersData });
+                
+                syncIndicator.className = 'sync-indicator success';
+                syncIndicator.innerHTML = ' <i class="fas fa-check-circle"></i> Данные сохранены';
+                
+                setTimeout(() => {
+                    syncIndicator.className = '';
+                    syncIndicator.innerHTML = '';
+                }, 3000);
+                
+                return true;
+            } catch (error) {
+                console.error('Error saving data:', error);
+                syncIndicator.className = 'sync-indicator error';
+                syncIndicator.innerHTML = ' <i class="fas fa-exclamation-circle"></i> Ошибка сохранения';
+                return false;
+            }
+        }
+        
+        // Обновить рейтинг пользователя
+        function updateRating(user) {
+            const total = user.upvotes + user.downvotes;
+            user.total_votes = total;
+            user.rating = total > 0 ? (user.upvotes / total * 100) : 0.0;
+        }
+        
+        // Создать карточку пользователя
+        function createUserCard(user) {
+            const isCreator = user.name === 'Артур (создатель)';
+            const hasSavior = user.badges.includes('savior');
+            const hasPremium = user.badges.includes('premium');
+            
+            const card = document.createElement('div');
+            card.className = 'user-card';
+            
+            if (isCreator) {
+                card.classList.add('creator');
+            } else if (hasSavior) {
+                card.classList.add('savior');
+            } else if (hasPremium) {
+                card.classList.add('premium');
+            }
+            
+            // Верхняя секция - место и имя
+            const topSection = document.createElement('div');
+            topSection.className = 'card-top';
+            
+            // Круг с местом
+            const placeCircle = document.createElement('div');
+            if (isCreator) {
+                placeCircle.className = 'place-circle creator';
+                placeCircle.textContent = 'A';
+            } else if (user.place <= 3) {
+                placeCircle.className = 'place-circle top3';
+                placeCircle.textContent = user.place;
+            } else {
+                placeCircle.className = 'place-circle other';
+                placeCircle.textContent = user.place;
+            }
+            
+            // Имя пользователя
+            const userName = document.createElement('div');
+            userName.className = 'user-name';
+            userName.textContent = user.name;
+            
+            topSection.appendChild(placeCircle);
+            topSection.appendChild(userName);
+            
+            // Средняя секция - рейтинг и голоса
+            const middleSection = document.createElement('div');
+            middleSection.className = 'card-middle';
+            
+            // Блок рейтинга
+            const ratingBox = document.createElement('div');
+            ratingBox.className = 'rating-box';
+            
+            const ratingLabel = document.createElement('div');
+            ratingLabel.className = 'label';
+            ratingLabel.textContent = 'РЕЙТИНГ';
+            
+            const ratingValue = document.createElement('div');
+            ratingValue.className = 'rating-value';
+            
+            if (user.rating > 0) {
+                if (user.rating < 50) {
+                    ratingValue.classList.add('low');
+                } else if (user.rating < 70) {
+                    ratingValue.classList.add('medium');
+                } else {
+                    ratingValue.classList.add('high');
+                }
+            }
+            
+            ratingValue.textContent = `${user.rating.toFixed(1)}%`;
+            
+            ratingBox.appendChild(ratingLabel);
+            ratingBox.appendChild(ratingValue);
+            
+            // Блок голосов
+            const votesBox = document.createElement('div');
+            votesBox.className = 'votes-box';
+            
+            const votesLabel = document.createElement('div');
+            votesLabel.className = 'label';
+            votesLabel.textContent = 'ГОЛОСОВ';
+            
+            const votesValue = document.createElement('div');
+            votesValue.className = 'votes-value';
+            votesValue.textContent = user.total_votes;
+            
+            votesBox.appendChild(votesLabel);
+            votesBox.appendChild(votesValue);
+            
+            middleSection.appendChild(ratingBox);
+            middleSection.appendChild(votesBox);
+            
+            // Нижняя секция - кнопки
+            const bottomSection = document.createElement('div');
+            bottomSection.className = 'card-bottom';
+            
+            // Кнопка лайка
+            const likeBtn = document.createElement('button');
+            likeBtn.className = 'vote-btn like-btn';
+            likeBtn.textContent = 'Лайк';
+            likeBtn.addEventListener('click', () => castVote(user.id, 1));
+            
+            // Кнопка дизлайка
+            const dislikeBtn = document.createElement('button');
+            dislikeBtn.className = 'vote-btn dislike-btn';
+            dislikeBtn.textContent = 'Дизлайк';
+            dislikeBtn.addEventListener('click', () => castVote(user.id, -1));
+            
+            bottomSection.appendChild(likeBtn);
+            bottomSection.appendChild(dislikeBtn);
+            
+            // Кнопки администратора
+            if (isAdmin && !isCreator) {
+                const adminButtons = document.createElement('div');
+                adminButtons.className = 'admin-buttons';
+                
+                // Кнопка спасителя
+                const saviorBtn = document.createElement('button');
+                saviorBtn.className = 'admin-btn savior-btn';
+                saviorBtn.innerHTML = '<i class="fas fa-crown"></i>';
+                saviorBtn.title = 'Переключить статус Спаситель';
+                saviorBtn.addEventListener('click', () => toggleSaviorBadge(user.id));
+                
+                // Кнопка премиума
+                const premiumBtn = document.createElement('button');
+                premiumBtn.className = 'admin-btn premium-btn';
+                premiumBtn.innerHTML = '<i class="fas fa-star"></i>';
+                premiumBtn.title = 'Переключить премиум статус';
+                premiumBtn.addEventListener('click', () => togglePremium(user.id));
+                
+                adminButtons.appendChild(saviorBtn);
+                adminButtons.appendChild(premiumBtn);
+                
+                bottomSection.appendChild(adminButtons);
+            }
+            
+            // Отображение бейджей
+            if (user.badges.length > 0) {
+                const badgesContainer = document.createElement('div');
+                badgesContainer.className = 'badges';
+                
+                if (user.badges.includes('savior')) {
+                    const saviorBadge = document.createElement('span');
+                    saviorBadge.className = 'badge badge-savior';
+                    saviorBadge.textContent = 'Спаситель';
+                    badgesContainer.appendChild(saviorBadge);
+                }
+                
+                if (user.badges.includes('premium')) {
+                    const premiumBadge = document.createElement('span');
+                    premiumBadge.className = 'badge badge-premium';
+                    premiumBadge.textContent = 'Премиум';
+                    badgesContainer.appendChild(premiumBadge);
+                }
+                
+                middleSection.appendChild(badgesContainer);
+            }
+            
+            // Собираем карточку
+            card.appendChild(topSection);
+            card.appendChild(middleSection);
+            card.appendChild(bottomSection);
+            
+            return card;
+        }
+        
+        // Обновить отображение с отсортированными пользователями
+        function updateDisplay() {
+            const usersContainer = document.getElementById('usersContainer');
+            usersContainer.innerHTML = '';
+            
+            // Отделяем создателя от остальных
+            const creator = usersData.filter(u => u.name === 'Артур (создатель)');
+            const otherUsers = usersData.filter(u => u.name !== 'Артур (создатель)');
+            
+            // Сортируем остальных: спасители → премиум → остальные по рейтингу
+            const saviors = otherUsers.filter(u => u.badges.includes('savior'));
+            const premium = otherUsers.filter(u => u.badges.includes('premium') && !u.badges.includes('savior'));
+            const others = otherUsers.filter(u => !u.badges.includes('savior') && !u.badges.includes('premium'));
+            
+            saviors.sort((a, b) => b.rating - a.rating);
+            premium.sort((a, b) => b.rating - a.rating);
+            others.sort((a, b) => b.rating - a.rating);
+            
+            // Собираем в правильном порядке: создатель → спасители → премиум → остальные
+            const sortedUsers = [...creator, ...saviors, ...premium, ...others];
+            
+            // Обновляем места (начинаем с 2, так как создатель на месте A)
+            sortedUsers.forEach((user, index) => {
+                if (user.name === 'Артур (создатель)') {
+                    user.place = 0; // Особое место для создателя
+                } else {
+                    user.place = index; // Остальные получают свои места
+                }
+                
+                const card = createUserCard(user);
+                usersContainer.appendChild(card);
+            });
+        }
+        
+        // Проголосовать
+        async function castVote(userId, voteValue) {
+            const user = usersData.find(u => u.id === userId);
+            if (user) {
+                if (voteValue > 0) {
+                    user.upvotes += 1;
+                } else {
+                    user.downvotes += 1;
+                }
+                
+                updateRating(user);
+                const saved = await saveData();
+                
+                if (saved) {
+                    updateDisplay();
+                    setStatusMessage(`Голос за ${user.name} учтен!`);
+                } else {
+                    setStatusMessage('Ошибка сохранения голоса!');
+                }
+            }
+        }
+        
+        // Переключить статус Спаситель
+        async function toggleSaviorBadge(userId) {
+            const user = usersData.find(u => u.id === userId);
+            if (user && user.name !== 'Артур (создатель)') {
+                const index = user.badges.indexOf('savior');
+                
+                if (index > -1) {
+                    user.badges.splice(index, 1);
+                    setStatusMessage(`Статус снят с ${user.name}`);
+                } else {
+                    user.badges.push('savior');
+                    setStatusMessage(`${user.name} теперь Спаситель!`);
+                }
+                
+                const saved = await saveData();
+                
+                if (saved) {
+                    updateDisplay();
+                } else {
+                    setStatusMessage('Ошибка сохранения изменений!');
+                }
+            }
+        }
+        
+        // Переключить премиум статус
+        async function togglePremium(userId) {
+            const user = usersData.find(u => u.id === userId);
+            if (user && user.name !== 'Артур (создатель)') {
+                const index = user.badges.indexOf('premium');
+                
+                if (index > -1) {
+                    user.badges.splice(index, 1);
+                    setStatusMessage(`Премиум снят с ${user.name}`);
+                } else {
+                    user.badges.push('premium');
+                    setStatusMessage(`${user.name} теперь с Премиум!`);
+                }
+                
+                const saved = await saveData();
+                
+                if (saved) {
+                    updateDisplay();
+                } else {
+                    setStatusMessage('Ошибка сохранения изменений!');
+                }
+            }
+        }
+        
+        // Переключить режим администратора
+        function toggleAdminMode() {
+            isAdmin = !isAdmin;
+            const adminBtn = document.getElementById('adminModeBtn');
+            
+            if (isAdmin) {
+                adminBtn.textContent = 'Обычный режим';
+                adminBtn.classList.add('active');
+                setStatusMessage('Режим администратора активен');
+            } else {
+                adminBtn.textContent = 'Режим админа';
+                adminBtn.classList.remove('active');
+                setStatusMessage('ArTurProgramming V beta');
+            }
+            
+            updateDisplay();
+        }
+        
+        // Установить статус сообщение с таймаутом
+        function setStatusMessage(message) {
+            const statusBar = document.getElementById('statusBar');
+            const syncIndicator = document.getElementById('syncIndicator');
+            
+            // Сохраняем индикатор синхронизации
+            const indicatorHtml = syncIndicator.innerHTML;
+            
+            statusBar.innerHTML = message;
+            statusBar.appendChild(syncIndicator);
+            
+            if (message !== 'ArTurProgramming V beta') {
+                setTimeout(() => {
+                    statusBar.innerHTML = 'ArTurProgramming V beta';
+                    statusBar.appendChild(syncIndicator);
+                }, 3000);
+            }
+        }
+        
+        // Показать модальное окно подтверждения удаления
+        function showDeleteConfirmation() {
+            const modal = document.getElementById('deleteModal');
+            modal.style.display = 'flex';
+        }
+        
+        // Удалить все данные
+        async function deleteAllData() {
+            // Сбрасываем данные к начальным значениям
+            usersData = JSON.parse(JSON.stringify(initialUsersData));
+            
+            const saved = await saveData();
+            
+            if (saved) {
+                updateDisplay();
+                setStatusMessage('Все данные сброшены к начальным значениям!');
+            } else {
+                setStatusMessage('Ошибка сброса данных!');
+            }
+        }
+        
+        // Инициализация приложения
+        async function initApp() {
+            // Загружаем данные
+            const loaded = await loadData();
+            
+            if (loaded) {
+                updateDisplay();
+                
+                // Настраиваем обработчики событий
+                document.getElementById('adminModeBtn').addEventListener('click', toggleAdminMode);
+                document.getElementById('deleteAllBtn').addEventListener('click', showDeleteConfirmation);
+                
+                // Обработчики модального окна
+                document.getElementById('modalCancel').addEventListener('click', () => {
+                    document.getElementById('deleteModal').style.display = 'none';
+                });
+                
+                document.getElementById('modalConfirm').addEventListener('click', () => {
+                    document.getElementById('deleteModal').style.display = 'none';
+                    deleteAllData();
+                });
+                
+                // Автоматическое обновление данных каждые 30 секунд
+                setInterval(async () => {
+                    await loadData();
+                    updateDisplay();
+                }, 30000);
+            } else {
+                const usersContainer = document.getElementById('usersContainer');
+                usersContainer.innerHTML = `
+                    <div class="loading">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #ff4d4d; margin-bottom: 15px;"></i>
+                        <p>Ошибка загрузки данных</p>
+                        <button id="retryButton" style="margin-top: 15px; padding: 10px 20px; background-color: #2e7dba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Попробовать снова
+                        </button>
+                    </div>
+                `;
+                
+                document.getElementById('retryButton').addEventListener('click', initApp);
+            }
+        }
+        
+        // Запускаем приложение при загрузке страницы
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
