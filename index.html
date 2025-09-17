@@ -388,6 +388,76 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        
+        .config-panel {
+            background-color: #e6f7ff;
+            border: 1px solid #99d6ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .config-panel h3 {
+            color: #007acc;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .config-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .form-group label {
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .form-group input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #2e7dba;
+        }
+        
+        .save-config-btn {
+            padding: 10px;
+            background-color: #2e7dba;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .github-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        .github-info a {
+            color: #2e7dba;
+            text-decoration: none;
+        }
+        
+        .github-info a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -397,6 +467,29 @@
         </div>
         
         <div class="content">
+            <div class="config-panel" id="configPanel">
+                <h3><i class="fab fa-github"></i> Настройка доступа к GitHub</h3>
+                <div class="config-form">
+                    <div class="form-group">
+                        <label for="githubToken">GitHub Personal Access Token</label>
+                        <input type="password" id="githubToken" placeholder="Введите ваш токен доступа">
+                    </div>
+                    <div class="form-group">
+                        <label for="repoOwner">Владелец репозитория</label>
+                        <input type="text" id="repoOwner" value="ArTurProgramming-official" placeholder="Имя пользователя GitHub">
+                    </div>
+                    <div class="form-group">
+                        <label for="repoName">Название репозитория</label>
+                        <input type="text" id="repoName" value="reting" placeholder="Название репозитория">
+                    </div>
+                    <button class="save-config-btn" id="saveConfigBtn">Сохранить настройки</button>
+                </div>
+                <div class="github-info">
+                    <p>Как получить токен: Settings → Developer settings → Personal access tokens → Generate new token</p>
+                    <p>Дайте токену права доступа: <strong>repo</strong> (полный контроль над репозиториями)</p>
+                </div>
+            </div>
+            
             <div class="users-container" id="usersContainer">
                 <div class="loading">
                     <div class="loading-spinner"></div>
@@ -429,15 +522,18 @@
     </div>
 
     <script>
-        // GitHub API для работы с репозиторием
+        // Конфигурация GitHub
         const GITHUB_API = 'https://api.github.com';
-        const REPO_OWNER = 'ArTurProgramming-official';
-        const REPO_NAME = 'reting';
         const DATA_FILE_PATH = 'data.json';
         
-        // Токен для доступа к GitHub API (в реальном приложении должен быть защищен)
-        // Для тестирования можно использовать личный токен, но в продакшене это не безопасно
-        const GITHUB_TOKEN = ''; // Оставьте пустым для публичного репозитория
+        let usersData = [];
+        let isAdmin = false;
+        let sha = null;
+        let githubConfig = {
+            token: '',
+            repoOwner: 'ArTurProgramming-official',
+            repoName: 'reting'
+        };
         
         // Начальные данные пользователей
         const initialUsersData = [
@@ -468,20 +564,44 @@
             {id: 25, name: 'Софа Шляпникова', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []}
         ];
         
-        let usersData = [];
-        let isAdmin = false;
-        let sha = null; // SHA текущего файла для обновления
+        // Загрузка конфигурации
+        function loadConfig() {
+            const savedConfig = localStorage.getItem('github_config');
+            if (savedConfig) {
+                githubConfig = JSON.parse(savedConfig);
+                document.getElementById('githubToken').value = githubConfig.token;
+                document.getElementById('repoOwner').value = githubConfig.repoOwner;
+                document.getElementById('repoName').value = githubConfig.repoName;
+                
+                // Скрываем панель конфигурации, если токен есть
+                if (githubConfig.token) {
+                    document.getElementById('configPanel').style.display = 'none';
+                }
+            }
+        }
+        
+        // Сохранение конфигурации
+        function saveConfig() {
+            githubConfig.token = document.getElementById('githubToken').value;
+            githubConfig.repoOwner = document.getElementById('repoOwner').value;
+            githubConfig.repoName = document.getElementById('repoName').value;
+            
+            localStorage.setItem('github_config', JSON.stringify(githubConfig));
+            
+            if (githubConfig.token) {
+                document.getElementById('configPanel').style.display = 'none';
+                setStatusMessage('Настройки сохранены!');
+                loadData();
+            }
+        }
         
         // Функция для выполнения запросов к GitHub API
         async function githubApiRequest(url, options = {}) {
             const headers = {
                 'Accept': 'application/vnd.github.v3+json',
+                'Authorization': `token ${githubConfig.token}`,
                 ...options.headers
             };
-            
-            if (GITHUB_TOKEN) {
-                headers['Authorization'] = `token ${GITHUB_TOKEN}`;
-            }
             
             const response = await fetch(url, {
                 ...options,
@@ -498,11 +618,11 @@
         // Получить содержимое файла из репозитория
         async function getFileContent() {
             try {
-                const url = `${GITHUB_API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_FILE_PATH}`;
+                const url = `${GITHUB_API}/repos/${githubConfig.repoOwner}/${githubConfig.repoName}/contents/${DATA_FILE_PATH}`;
                 const content = await githubApiRequest(url);
                 
                 // Декодируем содержимое из base64
-                const decodedContent = atob(content.content);
+                const decodedContent = atob(content.content.replace(/\n/g, ''));
                 sha = content.sha; // Сохраняем SHA для будущих обновлений
                 
                 return JSON.parse(decodedContent);
@@ -515,7 +635,7 @@
         // Обновить содержимое файла в репозитории
         async function updateFileContent(data) {
             try {
-                const url = `${GITHUB_API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_FILE_PATH}`;
+                const url = `${GITHUB_API}/repos/${githubConfig.repoOwner}/${githubConfig.repoName}/contents/${DATA_FILE_PATH}`;
                 
                 // Кодируем содержимое в base64
                 const content = btoa(JSON.stringify(data, null, 2));
@@ -546,7 +666,7 @@
         // Создать начальный файл, если он не существует
         async function createInitialFile() {
             try {
-                const url = `${GITHUB_API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_FILE_PATH}`;
+                const url = `${GITHUB_API}/repos/${githubConfig.repoOwner}/${githubConfig.repoName}/contents/${DATA_FILE_PATH}`;
                 
                 const content = btoa(JSON.stringify({ users: initialUsersData }, null, 2));
                 
@@ -574,8 +694,15 @@
         // Загрузка данных из GitHub
         async function loadData() {
             const syncIndicator = document.getElementById('syncIndicator');
+            
+            if (!githubConfig.token) {
+                setStatusMessage('Введите токен доступа GitHub');
+                document.getElementById('configPanel').style.display = 'block';
+                return false;
+            }
+            
             syncIndicator.className = 'sync-indicator syncing';
-            syncIndicator.innerHTML = ' <i class="fas fa-sync-alt"></i> Загрузка...';
+            syncIndicator.innerHTML = ' <i class="fas fa-sync-alt"></i> Загрузка с GitHub...';
             
             try {
                 const data = await getFileContent();
@@ -589,6 +716,7 @@
                     syncIndicator.innerHTML = '';
                 }, 3000);
                 
+                updateDisplay();
                 return true;
             } catch (error) {
                 // Если файл не найден, создаем его с начальными данными
@@ -604,6 +732,7 @@
                             syncIndicator.innerHTML = '';
                         }, 3000);
                         
+                        updateDisplay();
                         return true;
                     } catch (createError) {
                         console.error('Error creating initial file:', createError);
@@ -624,7 +753,7 @@
         async function saveData() {
             const syncIndicator = document.getElementById('syncIndicator');
             syncIndicator.className = 'sync-indicator syncing';
-            syncIndicator.innerHTML = ' <i class="fas fa-sync-alt"></i> Сохранение...';
+            syncIndicator.innerHTML = ' <i class="fas fa-sync-alt"></i> Сохранение на GitHub...';
             
             try {
                 await updateFileContent({ users: usersData });
@@ -981,44 +1110,27 @@
         
         // Инициализация приложения
         async function initApp() {
-            // Загружаем данные
-            const loaded = await loadData();
+            // Загружаем конфигурацию
+            loadConfig();
             
-            if (loaded) {
-                updateDisplay();
-                
-                // Настраиваем обработчики событий
-                document.getElementById('adminModeBtn').addEventListener('click', toggleAdminMode);
-                document.getElementById('deleteAllBtn').addEventListener('click', showDeleteConfirmation);
-                
-                // Обработчики модального окна
-                document.getElementById('modalCancel').addEventListener('click', () => {
-                    document.getElementById('deleteModal').style.display = 'none';
-                });
-                
-                document.getElementById('modalConfirm').addEventListener('click', () => {
-                    document.getElementById('deleteModal').style.display = 'none';
-                    deleteAllData();
-                });
-                
-                // Автоматическое обновление данных каждые 30 секунд
-                setInterval(async () => {
-                    await loadData();
-                    updateDisplay();
-                }, 30000);
-            } else {
-                const usersContainer = document.getElementById('usersContainer');
-                usersContainer.innerHTML = `
-                    <div class="loading">
-                        <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #ff4d4d; margin-bottom: 15px;"></i>
-                        <p>Ошибка загрузки данных</p>
-                        <button id="retryButton" style="margin-top: 15px; padding: 10px 20px; background-color: #2e7dba; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                            Попробовать снова
-                        </button>
-                    </div>
-                `;
-                
-                document.getElementById('retryButton').addEventListener('click', initApp);
+            // Настраиваем обработчики событий
+            document.getElementById('saveConfigBtn').addEventListener('click', saveConfig);
+            document.getElementById('adminModeBtn').addEventListener('click', toggleAdminMode);
+            document.getElementById('deleteAllBtn').addEventListener('click', showDeleteConfirmation);
+            
+            // Обработчики модального окна
+            document.getElementById('modalCancel').addEventListener('click', () => {
+                document.getElementById('deleteModal').style.display = 'none';
+            });
+            
+            document.getElementById('modalConfirm').addEventListener('click', () => {
+                document.getElementById('deleteModal').style.display = 'none';
+                deleteAllData();
+            });
+            
+            // Загружаем данные, если токен есть
+            if (githubConfig.token) {
+                await loadData();
             }
         }
         
