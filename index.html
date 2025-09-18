@@ -248,8 +248,8 @@
             <div class="user-info" id="userInfo" style="display: none;">
                 <i class="fas fa-user"></i>
                 <span id="currentUserName">Пользователь</span>
-                <span class="badge badge-premium" id="premiumBadge" style="display: none;">Премиум (3 голоса)</span>
-                <span class="badge" id="votesInfo">Голосов: 0/1</span>
+                <span class="badge badge-premium" id="premiumBadge" style="display: none;">Премиум (3 за каждого)</span>
+                <span class="badge" id="votesInfo">Голосов использовано: 0</span>
             </div>
             
             <div class="admin-panel" id="adminPanel" style="display: none;">
@@ -338,7 +338,7 @@
             'wx90': 'Софа Шляпникова'
         };
 
-        // Премиум пользователи
+        // Премиум пользователи (могут голосовать 3 раза за каждого)
         const premiumUsers = ['ab12', 'cd34', 'ef56', 'gh78', 'ij90'];
 
         // Начальные данные учащихся
@@ -411,8 +411,8 @@
                     password: password,
                     name: studentPasswords[password],
                     isPremium: premiumUsers.includes(password),
-                    maxVotes: premiumUsers.includes(password) ? 3 : 1,
-                    isAdmin: password === 'ab12' // Только Артур - админ
+                    maxVotesPerUser: premiumUsers.includes(password) ? 3 : 1, // 3 для премиум, 1 для обычных
+                    isAdmin: password === 'ab12'
                 };
                 
                 loadUserVotes();
@@ -431,10 +431,11 @@
             document.getElementById('controlPanel').style.display = 'grid';
             
             document.getElementById('currentUserName').textContent = currentUser.name;
-            document.getElementById('votesInfo').textContent = `Голосов: ${getUsedVotes()}/${currentUser.maxVotes}`;
+            updateVotesInfo();
             
             if (currentUser.isPremium) {
                 document.getElementById('premiumBadge').style.display = 'inline-block';
+                document.getElementById('premiumBadge').textContent = `Премиум (${currentUser.maxVotesPerUser} за каждого)`;
             }
             
             if (currentUser.isAdmin) {
@@ -451,7 +452,6 @@
         }
 
         function loadAllVotesData() {
-            // Загружаем данные о всех голосах из localStorage
             allVotesData = {};
             for (const key in localStorage) {
                 if (key.startsWith('votes_')) {
@@ -469,14 +469,23 @@
             localStorage.setItem(`votes_${currentUser.password}`, JSON.stringify(userVotes));
         }
 
-        function getUsedVotes() {
+        function getTotalUsedVotes() {
             return Object.values(userVotes).reduce((sum, votes) => sum + votes, 0);
+        }
+
+        function updateVotesInfo() {
+            const totalVotes = getTotalUsedVotes();
+            document.getElementById('votesInfo').textContent = `Голосов использовано: ${totalVotes}`;
         }
 
         function canVote(userId) {
             const votesForUser = userVotes[userId] || 0;
-            const totalVotes = getUsedVotes();
-            return votesForUser < 1 && totalVotes < currentUser.maxVotes;
+            return votesForUser < currentUser.maxVotesPerUser;
+        }
+
+        function getRemainingVotes(userId) {
+            const votesForUser = userVotes[userId] || 0;
+            return currentUser.maxVotesPerUser - votesForUser;
         }
 
         // Загрузка данных из Firebase
@@ -521,7 +530,7 @@
             if (!db || !currentUser) return;
             
             if (!canVote(userId)) {
-                alert('Вы уже проголосовали за этого ученика или исчерпали лимит голосов!');
+                alert(`Вы уже использовали все ${currentUser.maxVotesPerUser} голоса за этого ученика!`);
                 return;
             }
 
@@ -551,6 +560,7 @@
                 loadAllVotesData();
                 
                 loadData();
+                updateVotesInfo();
                 
             } catch (error) {
                 console.error('Ошибка голосования:', error);
@@ -598,7 +608,6 @@
             document.getElementById('statsModalTitle').textContent = `Статистика: ${userName}`;
             document.getElementById('statsModal').style.display = 'flex';
             
-            // Собираем статистику голосов для этого пользователя
             setTimeout(() => {
                 const votes = {};
                 
@@ -644,7 +653,6 @@
             setTimeout(() => {
                 const stats = {};
                 
-                // Считаем общее количество голосов
                 for (const voterData of Object.values(allVotesData)) {
                     for (const [userId, count] of Object.entries(voterData.votes)) {
                         if (!stats[userId]) {
@@ -702,6 +710,7 @@
                 userVotes = {};
                 allVotesData = {};
                 loadData();
+                updateVotesInfo();
                 alert('Все данные сброшены!');
                 
             } catch (error) {
@@ -728,7 +737,7 @@
             const container = document.getElementById('usersContainer');
             container.innerHTML = '';
             
-            document.getElementById('votesInfo').textContent = `Голосов: ${getUsedVotes()}/${currentUser.maxVotes}`;
+            updateVotesInfo();
             
             usersData.forEach((user, index) => {
                 const card = document.createElement('div');
@@ -737,9 +746,14 @@
                 
                 const userVoteCount = userVotes[user.id] || 0;
                 const canUserVote = canVote(user.id);
+                const remainingVotes = getRemainingVotes(user.id);
                 
                 card.innerHTML = `
-                    ${userVoteCount > 0 ? `<div class="vote-count">${userVoteCount}</div>` : ''}
+                    ${userVoteCount > 0 ? `
+                    <div class="vote-count" title="Ваши голоса: ${userVoteCount}/${currentUser.maxVotesPerUser}">
+                        ${userVoteCount}/${currentUser.maxVotesPerUser}
+                    </div>
+                    ` : ''}
                     ${currentUser.isAdmin && isAdminMode ? `
                     <div class="admin-controls">
                         <button class="admin-btn savior-btn" onclick="toggleBadge('${user.id}', 'savior')" title="Спаситель">
@@ -772,9 +786,11 @@
                     <div class="card-bottom">
                         <button class="vote-btn like-btn" onclick="castVote('${user.id}', 1)" ${!canUserVote ? 'disabled' : ''}>
                             <i class="fas fa-thumbs-up"></i> Лайк
+                            ${canUserVote ? `<br><small>Осталось: ${remainingVotes}</small>` : ''}
                         </button>
                         <button class="vote-btn dislike-btn" onclick="castVote('${user.id}', -1)" ${!canUserVote ? 'disabled' : ''}>
                             <i class="fas fa-thumbs-down"></i> Дизлайк
+                            ${canUserVote ? `<br><small>Осталось: ${remainingVotes}</small>` : ''}
                         </button>
                     </div>
                     ${user.badges && user.badges.length > 0 ? `
@@ -801,7 +817,6 @@
             document.getElementById('adminModeBtn').addEventListener('click', toggleAdminMode);
             document.getElementById('globalStatsBtn').addEventListener('click', showGlobalStats);
             
-            // Закрытие модальных окон по клику вне области
             document.querySelectorAll('.modal').forEach(modal => {
                 modal.addEventListener('click', (e) => {
                     if (e.target === modal) {
@@ -814,4 +829,4 @@
         window.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
-                    </html>
+    </html>
