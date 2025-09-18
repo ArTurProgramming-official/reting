@@ -136,7 +136,7 @@
         .badge-savior { background: linear-gradient(135deg, #9c27b0 0%, #6a1b9a 100%); }
         .badge-premium { background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%); }
         
-        .control-panel { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin: 20px 0; }
+        .control-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
         
         .panel-btn {
             padding: 15px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;
@@ -219,7 +219,7 @@
 <body>
     <div class="app-container">
         <div class="header">
-            <h1>6 Б КЛАСС</h1>
+            <h1>6 Б КЛАсс</h1>
             <div class="class-name">Рейтинг учащихся</div>
             <div class="admin-badge" id="adminBadge" style="display: none;">
                 <i class="fas fa-crown"></i> РЕЖИМ АДМИНА
@@ -265,13 +265,14 @@
             </div>
             
             <div class="control-panel" id="controlPanel" style="display: none;">
-                <button class="panel-btn admin-mode-btn" id="adminModeBtn">
+                <!-- Только для Артура -->
+                <button class="panel-btn admin-mode-btn" id="adminModeBtn" style="display: none;">
                     <i class="fas fa-user-shield"></i> Режим админа
                 </button>
-                <button class="panel-btn stats-btn" id="globalStatsBtn">
+                <button class="panel-btn stats-btn" id="globalStatsBtn" style="display: none;">
                     <i class="fas fa-chart-bar"></i> Общая статистика
                 </button>
-                <button class="panel-btn reset-btn" id="resetBtn">
+                <button class="panel-btn reset-btn" id="resetBtn" style="display: none;">
                     <i class="fas fa-trash"></i> Сбросить данные
                 </button>
             </div>
@@ -358,7 +359,7 @@
             {id: '13', name: 'Юля Ситнюк', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
             {id: '14', name: 'Варя Косякова', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
             {id: '15', name: 'Рома отличник', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
-            {id: '16', name: 'Лиля Харламова', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
+            {id: '16', name: 'Лиля Харламова', uprides: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
             {id: '17', name: 'Юля Бабушкина', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
             {id: '18', name: 'Kristina', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
             {id: '19', name: 'Саша Сычугов', upvotes: 0, downvotes: 0, rating: 0.0, total_votes: 0, badges: []},
@@ -411,8 +412,8 @@
                     password: password,
                     name: studentPasswords[password],
                     isPremium: premiumUsers.includes(password),
-                    maxVotesPerUser: premiumUsers.includes(password) ? 3 : 1, // 3 для премиум, 1 для обычных
-                    isAdmin: password === 'ab12'
+                    maxVotesPerUser: premiumUsers.includes(password) ? 3 : 1,
+                    isAdmin: password === 'ab12' // Только Артур - админ
                 };
                 
                 loadUserVotes();
@@ -438,9 +439,13 @@
                 document.getElementById('premiumBadge').textContent = `Премиум (${currentUser.maxVotesPerUser} за каждого)`;
             }
             
+            // Показываем админ-панель только для Артура
             if (currentUser.isAdmin) {
                 document.getElementById('adminBadge').style.display = 'block';
                 document.getElementById('adminPanel').style.display = 'block';
+                document.getElementById('adminModeBtn').style.display = 'block';
+                document.getElementById('globalStatsBtn').style.display = 'block';
+                document.getElementById('resetBtn').style.display = 'block';
             }
             
             loadData();
@@ -813,9 +818,14 @@
                 if (e.key === 'Enter') login();
             });
             
-            document.getElementById('resetBtn').addEventListener('click', resetAllData);
-            document.getElementById('adminModeBtn').addEventListener('click', toggleAdminMode);
-            document.getElementById('globalStatsBtn').addEventListener('click', showGlobalStats);
+            // Эти обработчики добавляем только если они есть (для Артура)
+            const resetBtn = document.getElementById('resetBtn');
+            const adminModeBtn = document.getElementById('adminModeBtn');
+            const globalStatsBtn = document.getElementById('globalStatsBtn');
+            
+            if (resetBtn) resetBtn.addEventListener('click', resetAllData);
+            if (adminModeBtn) adminModeBtn.addEventListener('click', toggleAdminMode);
+            if (globalStatsBtn) globalStatsBtn.addEventListener('click', showGlobalStats);
             
             document.querySelectorAll('.modal').forEach(modal => {
                 modal.addEventListener('click', (e) => {
@@ -829,4 +839,4 @@
         window.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
-    </html>
+</html>
