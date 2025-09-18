@@ -13,17 +13,22 @@
         body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
         
         .app-container {
-            max-width: 900px; margin: 0 auto; background: white; border-radius: 20px;
+            max-width: 1100px; margin: 0 auto; background: white; border-radius: 20px;
             overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         }
         
         .header {
             background: linear-gradient(135deg, #2e7dba 0%, #1a56b0 100%); color: white;
-            padding: 25px; text-align: center;
+            padding: 25px; text-align: center; position: relative;
         }
         
         .header h1 { font-size: 32px; font-weight: 700; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
         .class-name { font-size: 16px; opacity: 0.9; margin-top: 5px; }
+        
+        .admin-badge {
+            position: absolute; top: 15px; right: 20px; background: #ff9800; color: white;
+            padding: 5px 15px; border-radius: 20px; font-size: 14px; font-weight: bold;
+        }
         
         .content { padding: 20px; }
         
@@ -77,6 +82,19 @@
             padding: 5px 10px; border-radius: 15px; font-size: 12px; font-weight: bold;
         }
         
+        .admin-controls {
+            position: absolute; top: 10px; left: 10px; display: flex; gap: 5px;
+        }
+        
+        .admin-btn {
+            width: 30px; height: 30px; border-radius: 50%; border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 12px;
+        }
+        
+        .savior-btn { background: #9c27b0; color: white; }
+        .premium-btn { background: #2196f3; color: white; }
+        .stats-btn { background: #607d8b; color: white; }
+        
         .card-top { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
         
         .place-circle {
@@ -118,7 +136,7 @@
         .badge-savior { background: linear-gradient(135deg, #9c27b0 0%, #6a1b9a 100%); }
         .badge-premium { background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%); }
         
-        .control-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+        .control-panel { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin: 20px 0; }
         
         .panel-btn {
             padding: 15px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;
@@ -129,6 +147,7 @@
         .admin-mode-btn { background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; }
         .admin-mode-btn.active { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
         .reset-btn { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; }
+        .stats-btn { background: linear-gradient(135deg, #607d8b 0%, #455a64 100%); color: white; }
         
         .status-bar {
             text-align: center; padding: 15px; color: #6c757d; font-size: 14px;
@@ -147,15 +166,43 @@
             margin-bottom: 15px;
         }
         
-        .error-panel {
-            background: #fff3cd; border: 2px solid #ffeaa7; border-radius: 15px; padding: 20px;
-            margin: 20px 0; text-align: center; color: #856404;
+        /* Модальные окна */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;
         }
         
-        .retry-btn {
-            padding: 12px 24px; background: #ff9800; color: white; border: none;
-            border-radius: 8px; cursor: pointer; margin-top: 15px; font-weight: 600;
+        .modal-content {
+            background: white; border-radius: 15px; padding: 25px; max-width: 500px;
+            width: 90%; max-height: 80vh; overflow-y: auto;
         }
+        
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .modal-title { font-size: 20px; font-weight: 700; color: #333; }
+        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #666; }
+        
+        .votes-list { margin-top: 15px; }
+        .vote-item {
+            display: flex; justify-content: space-between; padding: 10px;
+            border-bottom: 1px solid #f0f0f0; align-items: center;
+        }
+        
+        .vote-user { font-weight: 500; }
+        .vote-count-badge {
+            background: #2196f3; color: white; padding: 3px 8px; border-radius: 12px;
+            font-size: 12px; font-weight: bold;
+        }
+        
+        .admin-panel {
+            background: #fff3e0; border: 2px solid #ff9800; border-radius: 10px;
+            padding: 15px; margin: 15px 0;
+        }
+        
+        .admin-panel h3 { color: #e65100; margin-bottom: 10px; }
         
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
@@ -165,6 +212,7 @@
             .control-panel { grid-template-columns: 1fr; }
             body { padding: 10px; }
             .header h1 { font-size: 24px; }
+            .admin-badge { position: static; margin: 10px auto; width: fit-content; }
         }
     </style>
 </head>
@@ -173,6 +221,9 @@
         <div class="header">
             <h1>6 Б КЛАСС</h1>
             <div class="class-name">Рейтинг учащихся</div>
+            <div class="admin-badge" id="adminBadge" style="display: none;">
+                <i class="fas fa-crown"></i> РЕЖИМ АДМИНА
+            </div>
         </div>
         
         <div class="content">
@@ -201,6 +252,11 @@
                 <span class="badge" id="votesInfo">Голосов: 0/1</span>
             </div>
             
+            <div class="admin-panel" id="adminPanel" style="display: none;">
+                <h3><i class="fas fa-crown"></i> Панель администратора</h3>
+                <p>Вы можете просматривать статистику голосов и управлять статусами учеников</p>
+            </div>
+            
             <div class="users-container" id="usersContainer">
                 <div class="loading">
                     <div class="loading-spinner"></div>
@@ -212,6 +268,9 @@
                 <button class="panel-btn admin-mode-btn" id="adminModeBtn">
                     <i class="fas fa-user-shield"></i> Режим админа
                 </button>
+                <button class="panel-btn stats-btn" id="globalStatsBtn">
+                    <i class="fas fa-chart-bar"></i> Общая статистика
+                </button>
                 <button class="panel-btn reset-btn" id="resetBtn">
                     <i class="fas fa-trash"></i> Сбросить данные
                 </button>
@@ -219,6 +278,22 @@
             
             <div class="status-bar" id="statusBar">
                 <i class="fas fa-fire"></i> ClassRate System | Войдите для голосования
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно статистики -->
+    <div class="modal" id="statsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="statsModalTitle">Статистика голосов</h3>
+                <button class="modal-close" onclick="closeModal('statsModal')">&times;</button>
+            </div>
+            <div id="statsModalContent">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Загрузка статистики...</p>
+                </div>
             </div>
         </div>
     </div>
@@ -234,7 +309,7 @@
             appId: "1:445580377051:web:d19ad47e281874edf5c5fe"
         };
 
-        // Пароли для каждого ученика (буквы + цифры)
+        // Пароли для каждого ученика
         const studentPasswords = {
             'ab12': 'Артур (создатель)',
             'cd34': 'Маша Петрова',
@@ -263,8 +338,8 @@
             'wx90': 'Софа Шляпникова'
         };
 
-        // Премиум пользователи (могут голосовать 3 раза)
-        const premiumUsers = ['ab12', 'cd34', 'ef56', 'gh78', 'ij90']; // Первые 5 учеников
+        // Премиум пользователи
+        const premiumUsers = ['ab12', 'cd34', 'ef56', 'gh78', 'ij90'];
 
         // Начальные данные учащихся
         const initialUsersData = [
@@ -299,6 +374,8 @@
         let db = null;
         let currentUser = null;
         let userVotes = {};
+        let allVotesData = {};
+        let isAdminMode = false;
 
         // Инициализация Firebase
         function initializeFirebase() {
@@ -334,11 +411,12 @@
                     password: password,
                     name: studentPasswords[password],
                     isPremium: premiumUsers.includes(password),
-                    maxVotes: premiumUsers.includes(password) ? 3 : 1
+                    maxVotes: premiumUsers.includes(password) ? 3 : 1,
+                    isAdmin: password === 'ab12' // Только Артур - админ
                 };
                 
-                // Загружаем историю голосов пользователя
                 loadUserVotes();
+                loadAllVotesData();
                 showAppInterface();
                 
             } else {
@@ -359,12 +437,32 @@
                 document.getElementById('premiumBadge').style.display = 'inline-block';
             }
             
+            if (currentUser.isAdmin) {
+                document.getElementById('adminBadge').style.display = 'block';
+                document.getElementById('adminPanel').style.display = 'block';
+            }
+            
             loadData();
         }
 
         function loadUserVotes() {
             const savedVotes = localStorage.getItem(`votes_${currentUser.password}`);
             userVotes = savedVotes ? JSON.parse(savedVotes) : {};
+        }
+
+        function loadAllVotesData() {
+            // Загружаем данные о всех голосах из localStorage
+            allVotesData = {};
+            for (const key in localStorage) {
+                if (key.startsWith('votes_')) {
+                    const password = key.replace('votes_', '');
+                    const votes = JSON.parse(localStorage.getItem(key));
+                    allVotesData[password] = {
+                        name: studentPasswords[password],
+                        votes: votes
+                    };
+                }
+            }
         }
 
         function saveUserVotes() {
@@ -448,15 +546,136 @@
                 
                 await userRef.update(updates);
                 
-                // Сохраняем голос пользователя
                 userVotes[userId] = (userVotes[userId] || 0) + 1;
                 saveUserVotes();
+                loadAllVotesData();
                 
                 loadData();
                 
             } catch (error) {
                 console.error('Ошибка голосования:', error);
             }
+        }
+
+        async function toggleBadge(userId, badgeType) {
+            if (!currentUser.isAdmin) return;
+            
+            try {
+                const userRef = db.collection('users').doc(userId);
+                const userDoc = await userRef.get();
+                
+                if (!userDoc.exists) return;
+                
+                const user = userDoc.data();
+                const badges = user.badges || [];
+                const updates = {};
+                
+                if (badges.includes(badgeType)) {
+                    updates.badges = badges.filter(b => b !== badgeType);
+                } else {
+                    updates.badges = [...badges, badgeType];
+                }
+                
+                await userRef.update(updates);
+                loadData();
+                
+            } catch (error) {
+                console.error('Ошибка обновления бейджа:', error);
+            }
+        }
+
+        function showUserStats(userId, userName) {
+            if (!currentUser.isAdmin) return;
+            
+            const modalContent = document.getElementById('statsModalContent');
+            modalContent.innerHTML = `
+                <h4>Статистика голосов для: ${userName}</h4>
+                <div class="votes-list">
+                    <p>Загрузка данных...</p>
+                </div>
+            `;
+            
+            document.getElementById('statsModalTitle').textContent = `Статистика: ${userName}`;
+            document.getElementById('statsModal').style.display = 'flex';
+            
+            // Собираем статистику голосов для этого пользователя
+            setTimeout(() => {
+                const votes = {};
+                
+                for (const [voterPassword, voterData] of Object.entries(allVotesData)) {
+                    if (voterData.votes[userId]) {
+                        votes[voterPassword] = {
+                            name: voterData.name,
+                            count: voterData.votes[userId]
+                        };
+                    }
+                }
+                
+                const votesList = document.querySelector('.votes-list');
+                if (Object.keys(votes).length === 0) {
+                    votesList.innerHTML = '<p>Еще никто не голосовал за этого ученика</p>';
+                } else {
+                    votesList.innerHTML = Object.entries(votes)
+                        .sort((a, b) => b[1].count - a[1].count)
+                        .map(([password, data]) => `
+                            <div class="vote-item">
+                                <span class="vote-user">${data.name}</span>
+                                <span class="vote-count-badge">${data.count} голосов</span>
+                            </div>
+                        `).join('');
+                }
+            }, 100);
+        }
+
+        function showGlobalStats() {
+            if (!currentUser.isAdmin) return;
+            
+            const modalContent = document.getElementById('statsModalContent');
+            modalContent.innerHTML = `
+                <h4>Общая статистика голосов</h4>
+                <div class="votes-list">
+                    <p>Загрузка данных...</p>
+                </div>
+            `;
+            
+            document.getElementById('statsModalTitle').textContent = 'Общая статистика';
+            document.getElementById('statsModal').style.display = 'flex';
+            
+            setTimeout(() => {
+                const stats = {};
+                
+                // Считаем общее количество голосов
+                for (const voterData of Object.values(allVotesData)) {
+                    for (const [userId, count] of Object.entries(voterData.votes)) {
+                        if (!stats[userId]) {
+                            const user = usersData.find(u => u.id === userId);
+                            stats[userId] = {
+                                name: user ? user.name : 'Unknown',
+                                total: 0
+                            };
+                        }
+                        stats[userId].total += count;
+                    }
+                }
+                
+                const votesList = document.querySelector('.votes-list');
+                if (Object.keys(stats).length === 0) {
+                    votesList.innerHTML = '<p>Голосов еще нет</p>';
+                } else {
+                    votesList.innerHTML = Object.entries(stats)
+                        .sort((a, b) => b[1].total - a[1].total)
+                        .map(([userId, data]) => `
+                            <div class="vote-item">
+                                <span class="vote-user">${data.name}</span>
+                                <span class="vote-count-badge">${data.total} голосов</span>
+                            </div>
+                        `).join('');
+                }
+            }, 100);
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
         }
 
         async function resetAllData() {
@@ -467,7 +686,6 @@
             try {
                 const batch = db.batch();
                 
-                // Сбрасываем всех пользователей
                 initialUsersData.forEach((user) => {
                     const userRef = db.collection('users').doc(user.id);
                     batch.set(userRef, user);
@@ -475,7 +693,6 @@
                 
                 await batch.commit();
                 
-                // Очищаем все голосования
                 for (const key in localStorage) {
                     if (key.startsWith('votes_')) {
                         localStorage.removeItem(key);
@@ -483,6 +700,7 @@
                 }
                 
                 userVotes = {};
+                allVotesData = {};
                 loadData();
                 alert('Все данные сброшены!');
                 
@@ -491,11 +709,25 @@
             }
         }
 
+        function toggleAdminMode() {
+            isAdminMode = !isAdminMode;
+            const btn = document.getElementById('adminModeBtn');
+            
+            if (isAdminMode) {
+                btn.classList.add('active');
+                btn.innerHTML = '<i class="fas fa-user"></i> Обычный режим';
+            } else {
+                btn.classList.remove('active');
+                btn.innerHTML = '<i class="fas fa-user-shield"></i> Режим админа';
+            }
+            
+            updateDisplay();
+        }
+
         function updateDisplay() {
             const container = document.getElementById('usersContainer');
             container.innerHTML = '';
             
-            // Обновляем информацию о голосах
             document.getElementById('votesInfo').textContent = `Голосов: ${getUsedVotes()}/${currentUser.maxVotes}`;
             
             usersData.forEach((user, index) => {
@@ -508,6 +740,19 @@
                 
                 card.innerHTML = `
                     ${userVoteCount > 0 ? `<div class="vote-count">${userVoteCount}</div>` : ''}
+                    ${currentUser.isAdmin && isAdminMode ? `
+                    <div class="admin-controls">
+                        <button class="admin-btn savior-btn" onclick="toggleBadge('${user.id}', 'savior')" title="Спаситель">
+                            <i class="fas fa-crown"></i>
+                        </button>
+                        <button class="admin-btn premium-btn" onclick="toggleBadge('${user.id}', 'premium')" title="Премиум">
+                            <i class="fas fa-star"></i>
+                        </button>
+                        <button class="admin-btn stats-btn" onclick="showUserStats('${user.id}', '${user.name}')" title="Статистика">
+                            <i class="fas fa-chart-bar"></i>
+                        </button>
+                    </div>
+                    ` : ''}
                     <div class="card-top">
                         <div class="place-circle ${index < 3 ? 'top3' : 'other'}">${index + 1}</div>
                         <div class="user-name">${user.name}</div>
@@ -553,9 +798,20 @@
             });
             
             document.getElementById('resetBtn').addEventListener('click', resetAllData);
+            document.getElementById('adminModeBtn').addEventListener('click', toggleAdminMode);
+            document.getElementById('globalStatsBtn').addEventListener('click', showGlobalStats);
+            
+            // Закрытие модальных окон по клику вне области
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            });
         }
 
         window.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
-</html>
+                    </html>
